@@ -42,23 +42,26 @@ export const Easing = Object.freeze({
 });
 
 // ========================================
-// 애니메이션 타이밍 상수 (리서치 기준)
+// 애니메이션 타이밍 기본값 (런타임 변경 가능)
 // ========================================
 
-/** 스왑 애니메이션 시간 (ms) */
-const SWAP_DURATION = 250;
+/** 스왑 애니메이션 시간 기본값 (ms) */
+const DEFAULT_SWAP_DURATION = 200;
 
-/** 제거 애니메이션 시간 (ms) */
-const REMOVE_DURATION = 250;
+/** 제거 애니메이션 시간 기본값 (ms) */
+const DEFAULT_REMOVE_DURATION = 150;
 
-/** 낙하 애니메이션 시간/칸 (ms) */
-const FALL_DURATION_PER_CELL = 150;
+/** 낙하 애니메이션 시간/칸 기본값 (ms) */
+const DEFAULT_FALL_DURATION_PER_CELL = 115;
 
-/** 바운스 애니메이션 시간 (ms) */
-const BOUNCE_DURATION = 200;
+/** 낙하 가속 계수 기본값 (0=등속, 1=최대 가속) */
+const DEFAULT_FALL_ACCELERATION = 0.3;
 
-/** 블록 선택 강조 시간 (ms) */
-const HIGHLIGHT_PULSE_DURATION = 500;
+/** 바운스 애니메이션 시간 기본값 (ms) */
+const DEFAULT_BOUNCE_DURATION = 200;
+
+/** 블록 선택 강조 시간 기본값 (ms) */
+const DEFAULT_HIGHLIGHT_PULSE_DURATION = 500;
 
 // ========================================
 // AnimationManager 클래스
@@ -84,6 +87,20 @@ class AnimationManager {
 
         /** @type {Function|null} waitForAll 대기 resolve */
         this._waitResolve = null;
+
+        // 런타임 변경 가능한 애니메이션 파라미터
+        /** @type {number} 스왑 애니메이션 시간 (ms) */
+        this.swapDuration = DEFAULT_SWAP_DURATION;
+        /** @type {number} 제거 애니메이션 시간 (ms) */
+        this.removeDuration = DEFAULT_REMOVE_DURATION;
+        /** @type {number} 낙하 애니메이션 시간/칸 (ms) */
+        this.fallDurationPerCell = DEFAULT_FALL_DURATION_PER_CELL;
+        /** @type {number} 바운스 애니메이션 시간 (ms) */
+        this.bounceDuration = DEFAULT_BOUNCE_DURATION;
+        /** @type {number} 블록 선택 강조 시간 (ms) */
+        this.highlightPulseDuration = DEFAULT_HIGHLIGHT_PULSE_DURATION;
+        /** @type {number} 낙하 가속 계수 (0=등속, 1=최대 가속) */
+        this.fallAcceleration = DEFAULT_FALL_ACCELERATION;
     }
 
     // ========================================
@@ -213,6 +230,26 @@ class AnimationManager {
     }
 
     // ========================================
+    // 낙하 시간 계산 (가속 반영)
+    // ========================================
+
+    /**
+     * 낙하 거리에 따른 애니메이션 시간을 계산한다.
+     * fallAcceleration이 클수록 먼 거리의 낙하가 상대적으로 빨라진다.
+     * 공식: fallDurationPerCell × distance^(1 - fallAcceleration × 0.5)
+     * - accel=0: 등속 (시간 = 거리에 비례)
+     * - accel=0.3: 가벼운 가속
+     * - accel=1.0: 강한 가속 (√distance 비례)
+     * @param {number} distance - 낙하 거리 (칸 수, 소수점 가능)
+     * @returns {number} 애니메이션 시간 (ms)
+     */
+    _calcFallDuration(distance) {
+        if (distance <= 0) return this.fallDurationPerCell;
+        const exponent = 1 - this.fallAcceleration * 0.5;
+        return this.fallDurationPerCell * Math.pow(distance, exponent);
+    }
+
+    // ========================================
     // 팩토리 메서드 — 애니메이션 생성
     // ========================================
 
@@ -243,7 +280,7 @@ class AnimationManager {
         return {
             type: 'swap',
             targets: [block1, block2],
-            duration: SWAP_DURATION,
+            duration: this.swapDuration,
             easing: 'easeInOut',
             updateFn: (progress) => {
                 block1.visualX = start1X + (end1X - start1X) * progress;
@@ -284,7 +321,7 @@ class AnimationManager {
         return {
             type: 'remove',
             targets: [block],
-            duration: REMOVE_DURATION,
+            duration: this.removeDuration,
             easing: 'easeInOut',
             updateFn: (progress) => {
                 block.scale = 1.0 - progress * 0.8; // 1.0 → 0.2
@@ -318,7 +355,7 @@ class AnimationManager {
         return {
             type: 'fall',
             targets: [block],
-            duration: FALL_DURATION_PER_CELL * distance,
+            duration: this._calcFallDuration(distance),
             easing: 'easeOut',
             updateFn: (progress) => {
                 block.visualX = startX;
@@ -340,7 +377,7 @@ class AnimationManager {
         return {
             type: 'bounce',
             targets: [block],
-            duration: BOUNCE_DURATION,
+            duration: this.bounceDuration,
             easing: 'bounce',
             updateFn: (progress) => {
                 // 살짝 압축 후 복원
@@ -432,10 +469,10 @@ class AnimationManager {
             totalDistance += dist;
         }
 
-        // 총 이동 거리 기반 시간 계산 (최소 1칸 시간 보장)
+        // 총 이동 거리 기반 시간 계산 (가속 반영, 최소 1칸 시간 보장)
         const duration = Math.max(
-            FALL_DURATION_PER_CELL * totalDistance,
-            FALL_DURATION_PER_CELL
+            this._calcFallDuration(totalDistance),
+            this.fallDurationPerCell
         );
 
         // 최종 위치 미리 계산
@@ -490,7 +527,7 @@ class AnimationManager {
         return {
             type: 'selectionPulse',
             targets: [block],
-            duration: HIGHLIGHT_PULSE_DURATION,
+            duration: this.highlightPulseDuration,
             easing: 'linear',
             updateFn: (progress) => {
                 block.scale = 1.0 + 0.05 * Math.sin(progress * Math.PI * 2);
@@ -506,4 +543,4 @@ class AnimationManager {
 // 내보내기
 // ========================================
 
-export { AnimationManager, SWAP_DURATION, REMOVE_DURATION, FALL_DURATION_PER_CELL };
+export { AnimationManager, DEFAULT_SWAP_DURATION, DEFAULT_REMOVE_DURATION, DEFAULT_FALL_DURATION_PER_CELL, DEFAULT_FALL_ACCELERATION };

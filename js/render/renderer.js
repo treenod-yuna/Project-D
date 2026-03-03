@@ -31,17 +31,17 @@ if (typeof CanvasRenderingContext2D !== 'undefined' &&
 }
 
 // ========================================
-// 상수 정의
+// 기본값 상수 (런타임 변경 가능)
 // ========================================
 
-/** 셀 크기 (픽셀) */
-const CELL_SIZE = 64;
+/** 셀 크기 기본값 (픽셀) */
+const DEFAULT_CELL_SIZE = 64;
 
-/** 셀 내부 블록 패딩 (픽셀) */
-const CELL_PADDING = 4;
+/** 셀 내부 블록 패딩 기본값 (픽셀) */
+const DEFAULT_CELL_PADDING = 4;
 
-/** 보드 외곽 여백 (픽셀) */
-const BOARD_PADDING = 20;
+/** 보드 외곽 여백 기본값 (픽셀) */
+const DEFAULT_BOARD_PADDING = 20;
 
 /** 그리드 선 색상 */
 const GRID_LINE_COLOR = '#E0E0E0';
@@ -49,11 +49,11 @@ const GRID_LINE_COLOR = '#E0E0E0';
 /** 보드 배경 색상 */
 const BOARD_BG_COLOR = '#F5F5F5';
 
-/** 블록 모서리 둥글기 (픽셀) */
-const BLOCK_BORDER_RADIUS = 8;
+/** 블록 모서리 둥글기 기본값 (픽셀) */
+const DEFAULT_BLOCK_BORDER_RADIUS = 8;
 
-/** 이모지 폰트 크기 (픽셀) */
-const EMOJI_FONT_SIZE = 28;
+/** 이모지 폰트 크기 기본값 (픽셀) */
+const DEFAULT_EMOJI_FONT_SIZE = 28;
 
 /** 리소스 이미지 기본 경로 */
 const RESOURCE_BASE_PATH = 'assets/gimmick-resources/';
@@ -79,10 +79,16 @@ class Renderer {
         /** @type {object} Board 인스턴스 */
         this.board = board;
 
-        /** @type {number} 셀 크기 */
-        this.cellSize = CELL_SIZE;
-        /** @type {number} 보드 여백 */
-        this.boardPadding = BOARD_PADDING;
+        /** @type {number} 셀 크기 (런타임 변경 가능) */
+        this.cellSize = DEFAULT_CELL_SIZE;
+        /** @type {number} 셀 내부 패딩 (런타임 변경 가능) */
+        this.cellPadding = DEFAULT_CELL_PADDING;
+        /** @type {number} 보드 여백 (런타임 변경 가능) */
+        this.boardPadding = DEFAULT_BOARD_PADDING;
+        /** @type {number} 블록 모서리 둥글기 (런타임 변경 가능) */
+        this.blockBorderRadius = DEFAULT_BLOCK_BORDER_RADIUS;
+        /** @type {number} 이모지 폰트 크기 (런타임 변경 가능) */
+        this.emojiFontSize = DEFAULT_EMOJI_FONT_SIZE;
 
         /** @type {object|null} AnimationManager 인스턴스 */
         this._animationManager = null;
@@ -407,9 +413,9 @@ class Renderer {
         const baseX = useVisual ? block.visualX : defaultPos.x;
         const baseY = useVisual ? block.visualY : defaultPos.y;
 
-        const x = baseX + CELL_PADDING;
-        const y = baseY + CELL_PADDING;
-        const size = this.cellSize - CELL_PADDING * 2;
+        const x = baseX + this.cellPadding;
+        const y = baseY + this.cellPadding;
+        const size = this.cellSize - this.cellPadding * 2;
 
         // 블록 스케일/투명도 적용
         ctx.save();
@@ -434,7 +440,7 @@ class Renderer {
             // 이미지 렌더링 (둥근 모서리 클리핑)
             ctx.save();
             ctx.beginPath();
-            ctx.roundRect(x, y, size, size, BLOCK_BORDER_RADIUS);
+            ctx.roundRect(x, y, size, size, this.blockBorderRadius);
             ctx.clip();
             ctx.drawImage(img, x, y, size, size);
             ctx.restore();
@@ -444,7 +450,7 @@ class Renderer {
                 ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
                 ctx.lineWidth = 2;
                 ctx.beginPath();
-                ctx.roundRect(x + 1, y + 1, size - 2, size - 2, BLOCK_BORDER_RADIUS);
+                ctx.roundRect(x + 1, y + 1, size - 2, size - 2, this.blockBorderRadius);
                 ctx.stroke();
             }
         } else {
@@ -453,14 +459,14 @@ class Renderer {
             // 블록 배경
             ctx.fillStyle = bgColor;
             ctx.beginPath();
-            ctx.roundRect(x, y, size, size, BLOCK_BORDER_RADIUS);
+            ctx.roundRect(x, y, size, size, this.blockBorderRadius);
             ctx.fill();
 
             // 블록 테두리 (약간 어둡게)
             ctx.strokeStyle = this._darkenColor(bgColor, 0.2);
             ctx.lineWidth = 1.5;
             ctx.beginPath();
-            ctx.roundRect(x, y, size, size, BLOCK_BORDER_RADIUS);
+            ctx.roundRect(x, y, size, size, this.blockBorderRadius);
             ctx.stroke();
 
             // 특수 블록 빛남 테두리
@@ -468,7 +474,7 @@ class Renderer {
                 ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
                 ctx.lineWidth = 2;
                 ctx.beginPath();
-                ctx.roundRect(x + 1, y + 1, size - 2, size - 2, BLOCK_BORDER_RADIUS);
+                ctx.roundRect(x + 1, y + 1, size - 2, size - 2, this.blockBorderRadius);
                 ctx.stroke();
             }
 
@@ -479,12 +485,12 @@ class Renderer {
             gradient.addColorStop(1, 'rgba(0, 0, 0, 0.05)');
             ctx.fillStyle = gradient;
             ctx.beginPath();
-            ctx.roundRect(x, y, size, size, BLOCK_BORDER_RADIUS);
+            ctx.roundRect(x, y, size, size, this.blockBorderRadius);
             ctx.fill();
 
             // 이모지 아이콘
             if (typeDef.fallbackIcon) {
-                ctx.font = `${EMOJI_FONT_SIZE}px serif`;
+                ctx.font = `${this.emojiFontSize}px serif`;
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.fillText(
@@ -548,7 +554,7 @@ class Renderer {
             // 이미지 렌더링 (반투명 + 둥근 모서리)
             ctx.globalAlpha = 0.7;
             ctx.beginPath();
-            ctx.roundRect(x, y, size, size, BLOCK_BORDER_RADIUS);
+            ctx.roundRect(x, y, size, size, this.blockBorderRadius);
             ctx.clip();
             ctx.drawImage(img, x, y, size, size);
         } else {
@@ -556,13 +562,13 @@ class Renderer {
             ctx.globalAlpha = 0.5;
             ctx.fillStyle = typeDef.fallbackColor;
             ctx.beginPath();
-            ctx.roundRect(x, y, size, size, BLOCK_BORDER_RADIUS);
+            ctx.roundRect(x, y, size, size, this.blockBorderRadius);
             ctx.fill();
 
             // 레이어 아이콘
             if (typeDef.fallbackIcon) {
                 ctx.globalAlpha = 0.8;
-                ctx.font = `${EMOJI_FONT_SIZE - 4}px serif`;
+                ctx.font = `${this.emojiFontSize - 4}px serif`;
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.fillText(
@@ -603,7 +609,7 @@ class Renderer {
     _drawSpecialIndicator(ctx, block, baseX, baseY) {
         const cx = baseX + this.cellSize / 2;
         const cy = baseY + this.cellSize / 2;
-        const half = this.cellSize / 2 - CELL_PADDING;
+        const half = this.cellSize / 2 - this.cellPadding;
 
         ctx.save();
         ctx.globalAlpha = 0.6;
@@ -614,17 +620,17 @@ class Renderer {
             ctx.lineWidth = 2;
             // 왼쪽 화살표
             ctx.beginPath();
-            ctx.moveTo(baseX + CELL_PADDING + 6, cy);
-            ctx.lineTo(baseX + CELL_PADDING + 14, cy - 5);
-            ctx.moveTo(baseX + CELL_PADDING + 6, cy);
-            ctx.lineTo(baseX + CELL_PADDING + 14, cy + 5);
+            ctx.moveTo(baseX + this.cellPadding + 6, cy);
+            ctx.lineTo(baseX + this.cellPadding + 14, cy - 5);
+            ctx.moveTo(baseX + this.cellPadding + 6, cy);
+            ctx.lineTo(baseX + this.cellPadding + 14, cy + 5);
             ctx.stroke();
             // 오른쪽 화살표
             ctx.beginPath();
-            ctx.moveTo(baseX + this.cellSize - CELL_PADDING - 6, cy);
-            ctx.lineTo(baseX + this.cellSize - CELL_PADDING - 14, cy - 5);
-            ctx.moveTo(baseX + this.cellSize - CELL_PADDING - 6, cy);
-            ctx.lineTo(baseX + this.cellSize - CELL_PADDING - 14, cy + 5);
+            ctx.moveTo(baseX + this.cellSize - this.cellPadding - 6, cy);
+            ctx.lineTo(baseX + this.cellSize - this.cellPadding - 14, cy - 5);
+            ctx.moveTo(baseX + this.cellSize - this.cellPadding - 6, cy);
+            ctx.lineTo(baseX + this.cellSize - this.cellPadding - 14, cy + 5);
             ctx.stroke();
         } else if (block.typeId === 7) {
             // 세로 로켓: 상하 화살표
@@ -632,17 +638,17 @@ class Renderer {
             ctx.lineWidth = 2;
             // 위 화살표
             ctx.beginPath();
-            ctx.moveTo(cx, baseY + CELL_PADDING + 6);
-            ctx.lineTo(cx - 5, baseY + CELL_PADDING + 14);
-            ctx.moveTo(cx, baseY + CELL_PADDING + 6);
-            ctx.lineTo(cx + 5, baseY + CELL_PADDING + 14);
+            ctx.moveTo(cx, baseY + this.cellPadding + 6);
+            ctx.lineTo(cx - 5, baseY + this.cellPadding + 14);
+            ctx.moveTo(cx, baseY + this.cellPadding + 6);
+            ctx.lineTo(cx + 5, baseY + this.cellPadding + 14);
             ctx.stroke();
             // 아래 화살표
             ctx.beginPath();
-            ctx.moveTo(cx, baseY + this.cellSize - CELL_PADDING - 6);
-            ctx.lineTo(cx - 5, baseY + this.cellSize - CELL_PADDING - 14);
-            ctx.moveTo(cx, baseY + this.cellSize - CELL_PADDING - 6);
-            ctx.lineTo(cx + 5, baseY + this.cellSize - CELL_PADDING - 14);
+            ctx.moveTo(cx, baseY + this.cellSize - this.cellPadding - 6);
+            ctx.lineTo(cx - 5, baseY + this.cellSize - this.cellPadding - 14);
+            ctx.moveTo(cx, baseY + this.cellSize - this.cellPadding - 6);
+            ctx.lineTo(cx + 5, baseY + this.cellSize - this.cellPadding - 14);
             ctx.stroke();
         } else if (block.typeId === 9) {
             // 레인보우: 무지개색 테두리
@@ -709,4 +715,4 @@ class Renderer {
 // 내보내기
 // ========================================
 
-export { Renderer, CELL_SIZE, BOARD_PADDING };
+export { Renderer, DEFAULT_CELL_SIZE, DEFAULT_BOARD_PADDING };

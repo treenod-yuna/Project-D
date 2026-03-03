@@ -17,7 +17,7 @@
             <canvas id="game-canvas"></canvas>
         </div>
 
-        <!-- 우측 패널 (추후 확장: 파라미터 제어, 기믹 입력) -->
+        <!-- 우측 패널 -->
         <div id="side-panel">
             <div class="panel-section">
                 <h3>보드 정보</h3>
@@ -25,15 +25,18 @@
                     <p>초기화 중...</p>
                 </div>
             </div>
+
+            <!-- 파라미터 패널 컨테이너 (Phase 6) -->
+            <div id="parameter-panel-container"></div>
         </div>
     </div>
 
     <!-- 하단 정보 표시 -->
     <div id="board-info">
-        v7 | 클릭→키패드 1~5: 특수블록 배치 | 더블클릭: 특수블록 발동 | 리소스 이미지 적용
+        v8 | 클릭→키패드 1~5: 특수블록 배치 | 더블클릭: 특수블록 발동 | 파라미터 패널
     </div>
 
     <!-- 메인 스크립트 (ES Module) — 캐시 방지용 버전 파라미터 -->
-    <script type="module" src="js/main.js?v=7"></script>
+    <script type="module" src="js/main.js?v=8"></script>
 </body>
 </html>

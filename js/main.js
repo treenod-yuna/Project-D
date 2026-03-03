@@ -19,9 +19,10 @@ import { GimmickManager } from './gimmick/gimmickFramework.js';
 import { registerAllGimmickHandlers } from './gimmick/gimmickTypes.js';
 import { eventBus, EVENTS } from './core/eventBus.js';
 import { getNormalTypes, getBlockType, BLOCK_CATEGORY } from './core/blockTypes.js';
+import { ParameterPanel } from './ui/parameterPanel.js';
 
 // === 진단: 코드 버전 확인 ===
-console.log('%c[main] 코드 버전: v7 — 리소스 이미지 적용', 'color: lime; font-size: 14px;');
+console.log('%c[main] 코드 버전: v8 — 파라미터 패널', 'color: lime; font-size: 14px;');
 
 // ========================================
 // 초기화
@@ -112,8 +113,8 @@ function init() {
     };
 
     document.addEventListener('keydown', (e) => {
-        // 진단: 모든 키 입력 로그
-        console.log(`[키다운] key="${e.key}", code="${e.code}"`);
+        // 입력 필드에 포커스 시 키패드 무시
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
 
         const typeId = KEYPAD_MAP[e.key];
         if (!typeId) return;
@@ -142,10 +143,20 @@ function init() {
         }
     });
 
-    // 11. 게임 루프 시작
+    // 11. 파라미터 패널 초기화
+    const panelContainer = document.getElementById('parameter-panel-container');
+    let paramPanel = null;
+    if (panelContainer) {
+        paramPanel = new ParameterPanel(panelContainer, {
+            renderer,
+            animationManager
+        });
+    }
+
+    // 12. 게임 루프 시작
     renderer.startGameLoop();
 
-    // 12. 콘솔 디버깅용 전역 노출
+    // 13. 콘솔 디버깅용 전역 노출
     window.board = board;
     window.renderer = renderer;
     window.animationManager = animationManager;
@@ -156,14 +167,15 @@ function init() {
     window.cascadeManager = cascadeManager;
     window.gimmickManager = gimmickManager;
     window.eventBus = eventBus;
+    window.paramPanel = paramPanel;
 
-    // 13. 보드 정보 패널 업데이트
+    // 14. 보드 정보 패널 업데이트
     _updateBoardInfo(board);
 
-    // 14. 이벤트 구독 (UI 업데이트용)
+    // 15. 이벤트 구독 (UI 업데이트용)
     eventBus.on(EVENTS.CASCADE_COMPLETE, () => _updateBoardInfo(board));
 
-    // 15. 초기 상태 출력
+    // 16. 초기 상태 출력
     console.log('[main] 매치3 프로토타입 초기화 완료');
     console.log('[main] 블록을 드래그하여 스왑하세요.');
     board.debugPrint();
