@@ -1,0 +1,126 @@
+/**
+ * style.css — 기본 레이아웃 스타일
+ *
+ * 보드를 화면 중앙에 배치하고,
+ * 추후 파라미터 패널/기믹 입력 영역을 위한 구조를 제공한다.
+ */
+
+/* ========================================
+   리셋 및 기본 스타일
+   ======================================== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    font-family: 'Segoe UI', 'Noto Sans KR', sans-serif;
+    background-color: #1a1a2e;
+    color: #e0e0e0;
+    overflow: hidden;
+}
+
+/* ========================================
+   메인 레이아웃
+   ======================================== */
+
+/** 전체 앱 컨테이너 */
+#app {
+    display: flex;
+    width: 100%;
+    height: 100%;
+}
+
+/** 보드 영역 (중앙) */
+#board-area {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-width: 0;
+}
+
+/** 게임 캔버스 */
+#game-canvas {
+    border-radius: 16px;
+    box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.3),
+        0 0 0 1px rgba(255, 255, 255, 0.1);
+    background-color: #F5F5F5;
+    cursor: pointer;
+}
+
+/* ========================================
+   사이드 패널 (추후 확장)
+   ======================================== */
+
+/** 우측 패널 영역 */
+#side-panel {
+    width: 320px;
+    background-color: #16213e;
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    overflow-y: auto;
+}
+
+/** 패널 섹션 */
+.panel-section {
+    background-color: #1a1a2e;
+    border-radius: 12px;
+    padding: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/** 패널 제목 */
+.panel-section h3 {
+    font-size: 14px;
+    font-weight: 600;
+    color: #a0c4ff;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* ========================================
+   정보 표시 (Phase 1)
+   ======================================== */
+
+/** 보드 정보 텍스트 */
+#board-info {
+    position: fixed;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(26, 26, 46, 0.9);
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 13px;
+    color: #888;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    z-index: 10;
+}
+
+/* ========================================
+   반응형 (간단한 대응)
+   ======================================== */
+
+@media (max-width: 768px) {
+    #app {
+        flex-direction: column;
+    }
+
+    #side-panel {
+        width: 100%;
+        height: auto;
+        max-height: 40vh;
+        border-left: none;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+}

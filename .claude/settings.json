@@ -1,0 +1,36 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -c \":*)",
+      "WebFetch(domain:logicsimplified.com)",
+      "WebFetch(domain:azumo.com)",
+      "Bash(node --experimental-vm-modules tests/core/board.test.js)",
+      "Bash(npx http-server -p 8080 --cors -c-1)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:8080/index.html)",
+      "Bash(node tests/core/match.test.js)",
+      "Bash(node tests/core/board.test.js)",
+      "Bash(node tests/core/gravity.test.js)",
+      "Bash(node --experimental-vm-modules tests/core/match.test.js)",
+      "Bash(node --experimental-vm-modules tests/core/gravity.test.js)",
+      "Bash(node tests/core/special.test.js)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:8080/)",
+      "Bash(python -m http.server 8080)",
+      "Bash(npx jest --no-cache)",
+      "Bash(for i in 1 2 3 4 5)",
+      "Bash(do echo \"=== Run $i ===\")",
+      "Bash(node -e \":*)",
+      "Bash(done)",
+      "Bash(start http://localhost:8080)",
+      "Bash(node tests/gimmick/gimmick.test.js)",
+      "Bash(npx http-server -p 8080 -c-1)",
+      "Bash(npx http-server -p 8081 -c-1)",
+      "Bash(start http://localhost:8081)",
+      "Bash(npm install xlsx --save-dev)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:8080/assets/gimmick-resources/block01.png)",
+      "Bash(curl -s http://localhost:8080/js/render/renderer.js)",
+      "Bash(timeout 3)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:8080)",
+      "Bash(start python -m http.server 8080)"
+    ]
+  }
+}
